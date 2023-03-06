@@ -4,7 +4,7 @@ from celluloid import Camera
 from progress.bar import IncrementalBar
 
 def tanh(x, a):
-    return 0.5+0.5*(np.exp(a*x)-np.exp(-a*x))/(np.exp(a*x)+np.exp(-a*x))
+    return 0.5+0.5*(np.exp(np.float64(a*x))-np.exp(np.float64(-a*x)))/(np.exp(np.float64(a*x))+np.exp(np.float64(-a*x)))
 
 n = 1500
 dt = 0.01
@@ -40,9 +40,10 @@ A_reflected = []
 A_transmitted = []
 A_initial = []
 
+thetas = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
 
-#for index, theta in enumerate([0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]):
-for index, theta in enumerate([0.1]):
+for index, theta in enumerate(thetas):
+#for index, theta in enumerate([0.1]):
 
     A_reflected.append(0)
     A_transmitted.append(0)
@@ -84,14 +85,14 @@ for index, theta in enumerate([0.1]):
             u[:200] = 0
             v[:200] = 0
 
-        # if step < 20000:
-        #     A_initial[index] = max(A_initial[index], max(u[:3*n0]))
+        if step < 20000:
+            A_initial[index] = max(A_initial[index], max(u[:round(0.5*n)]))
 
-        # if step > 40000:
-        #     A_transmitted[index] = max(A_transmitted[index], max(u[3*n0:])) 
+        if step > 40000 and step < 50000:
+            A_transmitted[index] = max(A_transmitted[index], max(u[round(0.5*n):])) 
 
-        # if step > 40000 and step < 50000:
-        #     A_reflected[index] = max(A_reflected[index], max(u[:3*n0])) 
+        if step > 50000 and step < 60000:
+            A_reflected[index] = max(A_reflected[index], max(u[:round(0.5*n)])) 
 
         u_old = np.copy(u)
         for i in range(1, n-1):
@@ -116,3 +117,9 @@ for index, theta in enumerate([0.1]):
 print(A_initial)
 print(A_reflected)
 print(A_transmitted)
+
+plt.figure()
+plt.scatter(thetas, A_initial, label='I')
+plt.scatter(thetas, A_reflected, label='R')
+plt.scatter(thetas, A_transmitted, label='T')
+plt.show()
